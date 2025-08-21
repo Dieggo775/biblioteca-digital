@@ -10,13 +10,13 @@ public class Livro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Titulo e obrigatorio")
+    @NotBlank(message = "Título é obrigatório")
     private String titulo;
 
-    @NotBlank(message = "Autor e obrigatorio")
+    @NotBlank(message = "Autor é obrigatório")
     private String autor;
 
-    @NotBlank(message = "ISBN e obrigatorio")
+    @NotBlank(message = "ISBN é obrigatório")
     private String isbn;
 
     @Column(name = "ano_publicacao")
@@ -24,6 +24,9 @@ public class Livro {
 
     @Column(name = "imagem_url")
     private String imagemUrl;
+
+    @Column(name = "disponivel")
+    private boolean disponivel = true; // Novo campo
 
     // Getters e Setters
     public Long getId() {
@@ -72,5 +75,13 @@ public class Livro {
 
     public void setImagemUrl(String imagemUrl) {
         this.imagemUrl = imagemUrl;
+    }
+
+    public boolean isDisponivel() {
+        return disponivel;
+    }
+
+    public void setDisponivel(boolean disponivel) {
+        this.disponivel = disponivel;
     }
 }

@@ -1,3 +1,4 @@
+/* ===================== GERAL ===================== */
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
@@ -6,6 +7,51 @@ body {
 
 h1, h2 {
   color: #030303;
+}
+
+/* ===================== ÁREA DE LOGIN ===================== */
+#area-login {
+  max-width: 400px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+#area-login input {
+  margin-bottom: 10px;
+  padding: 10px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95em;
+}
+
+#area-login button {
+  padding: 10px 20px;
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+#area-login button:hover {
+  background-color: #0056b3;
+}
+
+#mensagemErro, #mensagemSucesso {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+/* ===================== LISTA DE LIVROS ===================== */
+#area-livros {
+  margin-top: 20px;
 }
 
 /* Lista de livros em grade responsiva */
@@ -28,8 +74,8 @@ h1, h2 {
 }
 
 .livro-card:hover {
-  transform: scale(1.20);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.01);
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
 }
 
 /* Imagem do livro */
@@ -52,31 +98,6 @@ h1, h2 {
   margin: 4px 0;
   font-size: 0.95em;
   color: #eb0c0c;
-}
-
-/* Formulário */
-form input {
-  margin-bottom: 10px;
-  padding: 10px;
-  width: 300px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 0.95em;
-}
-
-form button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s ease;
-}
-
-form button:hover {
-  background-color: #0056b3;
 }
 
 /* Botões dentro dos cards */
@@ -106,4 +127,14 @@ form button:hover {
 
 .livro-card button:last-of-type:hover {
   background-color: #a71d2a;
+}
+
+/* ===================== INPUT DE BUSCA ===================== */
+#busca {
+  padding: 10px;
+  width: 300px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95em;
+  margin-bottom: 20px;
 }

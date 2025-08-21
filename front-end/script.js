@@ -1,171 +1,208 @@
-const url = "http://localhost:8080/livros";
+const urlLivros = "http://localhost:8080/livros";
+const urlUsuarios = "http://localhost:8080/usuarios";
+const urlEmprestimos = "http://localhost:8080/emprestimos";
 
+let usuarioLogado = null;
 let modoEdicao = false;
 let livroEditandoId = null;
 
-// Função para listar livros
-function listarLivros() {
-  fetch(url)
-    .then(response => {
-      if (!response.ok) throw new Error("Erro ao buscar livros");
-      return response.json();
-    })
-    .then(data => {
-      const lista = document.getElementById("lista-livros");
-      lista.innerHTML = "";
-      data.forEach(livro => {
-        const card = document.createElement("div");
-        card.className = "livro-card";
-
-        const imagem = document.createElement("img");
-        imagem.src = livro.imagemUrl || "https://via.placeholder.com/150x220?text=Sem+Imagem";
-        imagem.alt = livro.titulo;
-        card.appendChild(imagem);
-
-        const info = document.createElement("div");
-        info.className = "livro-info";
-        info.innerHTML = `
-          <h3>${livro.titulo}</h3>
-          <p><strong>Autor:</strong> ${livro.autor}</p>
-          <p><strong>Ano:</strong> ${livro.anoPublicacao}</p>
-          <p><strong>ISBN:</strong> ${livro.isbn}</p>
-        `;
-        card.appendChild(info);
-
-        // Botão Editar
-        const btnEditar = document.createElement("button");
-        btnEditar.textContent = "Editar";
-        btnEditar.onclick = () => carregarParaEdicao(livro);
-        card.appendChild(btnEditar);
-
-        // Botão Excluir
-        const btnExcluir = document.createElement("button");
-        btnExcluir.textContent = "Excluir";
-        btnExcluir.onclick = () => excluirLivro(livro.id);
-        card.appendChild(btnExcluir);
-
-        lista.appendChild(card);
-      });
-    })
-    .catch(error => {
-      console.error("Erro:", error);
-      alert("Erro ao carregar livros.");
-    });
+// Função para mostrar mensagens de erro ou sucesso
+function mostrarMensagem(mensagem, tipo = "erro") {
+    const div = tipo === "erro" ? document.getElementById("mensagemErro") : document.getElementById("mensagemSucesso");
+    div.textContent = mensagem;
+    setTimeout(() => { div.textContent = ""; }, 3000);
 }
 
-// Função para cadastrar ou editar livro
-document.getElementById("form-livro").addEventListener("submit", function(event) {
-  event.preventDefault();
+// ===================== LOGIN / CADASTRO =====================
 
-  const novoLivro = {
-    titulo: document.getElementById("titulo").value,
-    autor: document.getElementById("autor").value,
-    isbn: document.getElementById("isbn").value,
-    anoPublicacao: parseInt(document.getElementById("ano").value),
-    imagemUrl: document.getElementById("imagem").value
-  };
+document.getElementById("form-login").addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-  const metodo = modoEdicao ? "PUT" : "POST";
-  const endpoint = modoEdicao ? `${url}/${livroEditandoId}` : url;
+    const nome = document.getElementById("login-nome").value.trim();
+    const email = document.getElementById("login-email").value.trim();
+    const telefone = document.getElementById("login-telefone").value.trim();
 
-  fetch(endpoint, {
-    method: metodo,
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(novoLivro)
-  })
-  .then(response => {
-    if (!response.ok) throw new Error("Erro ao salvar livro");
-    return response.json();
-  })
-  .then(data => {
-    alert(modoEdicao ? "Livro atualizado com sucesso!" : "Livro cadastrado com sucesso!");
-    listarLivros();
-    document.getElementById("form-livro").reset();
-    modoEdicao = false;
-    livroEditandoId = null;
-  })
-  .catch(error => {
-    console.error("Erro:", error);
-    alert("Erro ao salvar livro.");
-  });
+    if (!nome || !email || !telefone) {
+        mostrarMensagem("Preencha todos os campos para entrar/cadastrar.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${urlUsuarios}?email=${encodeURIComponent(email)}`);
+        if (!response.ok) throw new Error(`Erro ao verificar usuário: ${response.statusText}`);
+
+        const usuarios = await response.json();
+
+        if (usuarios.length === 0) {
+            mostrarMensagem("Usuário não cadastrado. Acesse a área de cadastro.");
+            return;
+        }
+
+        usuarioLogado = usuarios[0];
+        document.getElementById("area-login").style.display = "none";
+        document.getElementById("area-livros").style.display = "block";
+        listarLivros();
+    } catch (error) {
+        console.error("Erro:", error);
+        mostrarMensagem("Erro ao acessar usuário. Veja o console para detalhes.");
+    }
 });
 
-// Função para carregar dados no formulário para edição
-function carregarParaEdicao(livro) {
-  document.getElementById("titulo").value = livro.titulo;
-  document.getElementById("autor").value = livro.autor;
-  document.getElementById("isbn").value = livro.isbn;
-  document.getElementById("ano").value = livro.anoPublicacao;
-  document.getElementById("imagem").value = livro.imagemUrl;
+// ===================== LISTAR LIVROS =====================
 
-  modoEdicao = true;
-  livroEditandoId = livro.id;
+async function listarLivros() {
+    if (!usuarioLogado) return;
+
+    try {
+        const response = await fetch(urlLivros);
+        if (!response.ok) throw new Error(`Erro ao buscar livros: ${response.statusText}`);
+        const data = await response.json();
+
+        const lista = document.getElementById("lista-livros");
+        lista.innerHTML = "";
+
+        data.forEach(livro => {
+            const card = document.createElement("div");
+            card.className = "livro-card";
+
+            const imagem = document.createElement("img");
+            imagem.src = livro.imagemUrl || "https://via.placeholder.com/150x220?text=Sem+Imagem";
+            imagem.alt = livro.titulo;
+            card.appendChild(imagem);
+
+            const info = document.createElement("div");
+            info.className = "livro-info";
+            info.innerHTML = `
+                <h3>${livro.titulo}</h3>
+                <p><strong>Autor:</strong> ${livro.autor}</p>
+                <p><strong>Ano:</strong> ${livro.anoPublicacao}</p>
+                <p><strong>ISBN:</strong> ${livro.isbn}</p>
+            `;
+            card.appendChild(info);
+
+            const btnEmprestar = document.createElement("button");
+            btnEmprestar.textContent = "Emprestar";
+            btnEmprestar.onclick = () => emprestarLivro(livro.id);
+            card.appendChild(btnEmprestar);
+
+            const btnDevolver = document.createElement("button");
+            btnDevolver.textContent = "Devolver";
+            btnDevolver.onclick = () => devolverLivro(livro.id);
+            card.appendChild(btnDevolver);
+
+            lista.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("Erro:", error);
+        mostrarMensagem("Erro ao carregar livros.");
+    }
 }
 
-// Função para excluir livro
-function excluirLivro(id) {
-  if (!confirm("Deseja realmente excluir este livro?")) return;
+// ===================== EMPRESTAR / DEVOLVER =====================
 
-  fetch(`${url}/${id}`, {
-    method: "DELETE"
-  })
-  .then(response => {
-    if (!response.ok) throw new Error("Erro ao excluir livro");
-    listarLivros();
-  })
-  .catch(error => {
-    console.error("Erro:", error);
-    alert("Erro ao excluir livro.");
-  });
+async function emprestarLivro(livroId) {
+    if (!usuarioLogado) {
+        mostrarMensagem("Você precisa estar logado para emprestar.");
+        return;
+    }
+
+    try {
+        const response = await fetch(urlEmprestimos, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usuarioId: usuarioLogado.id, livroId })
+        });
+
+        if (!response.ok) throw new Error(`Erro ao emprestar livro: ${response.statusText}`);
+
+        mostrarMensagem("Livro emprestado com sucesso!", "sucesso");
+        listarLivros();
+    } catch (error) {
+        console.error("Erro:", error);
+        mostrarMensagem("Erro ao emprestar livro.");
+    }
 }
 
-// Função de busca por título
-document.getElementById("busca").addEventListener("input", function() {
-  const termo = this.value.toLowerCase();
+async function devolverLivro(livroId) {
+    if (!usuarioLogado) {
+        mostrarMensagem("Você precisa estar logado para devolver.");
+        return;
+    }
 
-  fetch(url)
-    .then(response => response.json())
-    .then(data => {
-      const filtrados = data.filter(livro =>
-        livro.titulo.toLowerCase().includes(termo)
-      );
-      const lista = document.getElementById("lista-livros");
-      lista.innerHTML = "";
-      filtrados.forEach(livro => {
-        const card = document.createElement("div");
-        card.className = "livro-card";
+    try {
+        const response = await fetch(`${urlEmprestimos}/devolver`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usuarioId: usuarioLogado.id, livroId })
+        });
 
-        const imagem = document.createElement("img");
-        imagem.src = livro.imagemUrl || "https://via.placeholder.com/150x220?text=Sem+Imagem";
-        imagem.alt = livro.titulo;
-        card.appendChild(imagem);
+        if (!response.ok) throw new Error(`Erro ao devolver livro: ${response.statusText}`);
 
-        const info = document.createElement("div");
-        info.className = "livro-info";
-        info.innerHTML = `
-          <h3>${livro.titulo}</h3>
-          <p><strong>Autor:</strong> ${livro.autor}</p>
-          <p><strong>Ano:</strong> ${livro.anoPublicacao}</p>
-          <p><strong>ISBN:</strong> ${livro.isbn}</p>
-        `;
-        card.appendChild(info);
+        mostrarMensagem("Livro devolvido com sucesso!", "sucesso");
+        listarLivros();
+    } catch (error) {
+        console.error("Erro:", error);
+        mostrarMensagem("Erro ao devolver livro.");
+    }
+}
 
-        const btnEditar = document.createElement("button");
-        btnEditar.textContent = "Editar";
-        btnEditar.onclick = () => carregarParaEdicao(livro);
-        card.appendChild(btnEditar);
+// ===================== FILTRO POR TÍTULO =====================
 
-        const btnExcluir = document.createElement("button");
-        btnExcluir.textContent = "Excluir";
-        btnExcluir.onclick = () => excluirLivro(livro.id);
-        card.appendChild(btnExcluir);
+document.getElementById("busca").addEventListener("input", async function() {
+    const termo = this.value.toLowerCase();
 
-        lista.appendChild(card);
-      });
-    });
+    try {
+        const response = await fetch(urlLivros);
+        if (!response.ok) throw new Error(`Erro ao buscar livros: ${response.statusText}`);
+        const data = await response.json();
+
+        const filtrados = data.filter(livro =>
+            livro.titulo.toLowerCase().includes(termo)
+        );
+
+        const lista = document.getElementById("lista-livros");
+        lista.innerHTML = "";
+        filtrados.forEach(livro => {
+            const card = document.createElement("div");
+            card.className = "livro-card";
+
+            const imagem = document.createElement("img");
+            imagem.src = livro.imagemUrl || "https://via.placeholder.com/150x220?text=Sem+Imagem";
+            imagem.alt = livro.titulo;
+            card.appendChild(imagem);
+
+            const info = document.createElement("div");
+            info.className = "livro-info";
+            info.innerHTML = `
+                <h3>${livro.titulo}</h3>
+                <p><strong>Autor:</strong> ${livro.autor}</p>
+                <p><strong>Ano:</strong> ${livro.anoPublicacao}</p>
+                <p><strong>ISBN:</strong> ${livro.isbn}</p>
+            `;
+            card.appendChild(info);
+
+            const btnEmprestar = document.createElement("button");
+            btnEmprestar.textContent = "Emprestar";
+            btnEmprestar.onclick = () => emprestarLivro(livro.id);
+            card.appendChild(btnEmprestar);
+
+            const btnDevolver = document.createElement("button");
+            btnDevolver.textContent = "Devolver";
+            btnDevolver.onclick = () => devolverLivro(livro.id);
+            card.appendChild(btnDevolver);
+
+            lista.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("Erro:", error);
+        mostrarMensagem("Erro ao filtrar livros.");
+    }
 });
 
-// Inicializa a lista ao carregar
-document.addEventListener("DOMContentLoaded", listarLivros);
+// ===================== INICIALIZAÇÃO =====================
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("area-livros").style.display = "none";
+});

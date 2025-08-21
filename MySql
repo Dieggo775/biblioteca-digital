@@ -1,0 +1,107 @@
+-- ===== Banco de dados: biblioteca_db =====
+USE biblioteca_db;
+
+-- ===== Tabela Livro =====
+CREATE TABLE IF NOT EXISTS Livro (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    autor VARCHAR(255) NOT NULL,
+    isbn VARCHAR(50) NOT NULL UNIQUE,
+    ano_publicacao INT,
+    imagem_url VARCHAR(500),
+    disponivel BOOLEAN DEFAULT TRUE
+);
+
+-- ===== Tabela Usuario =====
+CREATE TABLE IF NOT EXISTS Usuario (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE,
+    telefone VARCHAR(50)
+);
+
+-- ===== Tabela Emprestimo =====
+CREATE TABLE IF NOT EXISTS Emprestimo (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    livro_id BIGINT NOT NULL,
+    usuario_id BIGINT NOT NULL,
+    data_emprestimo DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data_devolucao DATETIME,
+    CONSTRAINT fk_livro FOREIGN KEY (livro_id) REFERENCES Livro(id),
+    CONSTRAINT fk_usuario FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
+);
+
+-- ===== Índices para otimização de busca =====
+CREATE INDEX idx_livro_titulo ON Livro(titulo);
+CREATE INDEX idx_livro_autor ON Livro(autor);
+CREATE INDEX idx_emprestimo_usuario ON Emprestimo(usuario_id);
+CREATE INDEX idx_emprestimo_livro ON Emprestimo(livro_id);
+
+-- ===== Inserção de Usuários =====
+INSERT INTO Usuario (nome, email, telefone)
+VALUES
+('Ana Silva', 'ana.silva@email.com', '11988887777'),
+('João Santos', 'joao.santos@email.com', '11999998888'),
+('Maria Oliveira', 'maria.oliveira@email.com', '11977776666');
+
+-- ===== Inserção de Empréstimos =====
+-- Exemplo: Livro 1 emprestado para Usuário 1
+INSERT INTO Emprestimo (livro_id, usuario_id, data_emprestimo)
+VALUES
+(1, 1, NOW());
+
+-- Atualiza o status do livro para indisponível
+UPDATE Livro SET disponivel = FALSE WHERE id = 1;
+
+-- Exemplo: Livro 2 disponível
+-- Nenhum empréstimo registrado, logo disponivel = TRUE
+
+ALTER TABLE Usuario
+ADD COLUMN telefone VARCHAR(50);
+
+SELECT * FROM biblioteca_db.usuario;
+
+-- ===== Inserção de Usuários =====
+INSERT INTO Usuario (nome, email, telefone)
+VALUES
+('Ana Silva', 'ana.silva@email.com', '11988887777'),
+('João Santos', 'joao.santos@email.com', '11999998888'),
+('Maria Oliveira', 'maria.oliveira@email.com', '11977776666');
+
+-- ===== Inserção de Empréstimos =====
+-- Exemplo: Livro 1 emprestado para Usuário 1
+INSERT INTO Emprestimo (livro_id, usuario_id, data_emprestimo)
+VALUES
+(1, 1, NOW());
+
+-- Atualiza o status do livro para indisponível
+UPDATE Livro SET disponivel = FALSE WHERE id = 1;
+
+-- Exemplo: Livro 2 disponível
+-- Nenhum empréstimo registrado, logo disponivel = TRUE
+
+SELECT * FROM biblioteca_db.emprestimo;
+
+SELECT * FROM biblioteca_db.livro;
+
+SELECT * FROM biblioteca_db.usuario;
+
+-- ===== Inserção de Usuários =====
+INSERT INTO Usuario (nome, email, telefone)
+VALUES
+('Ana Silva', 'ana.silva@email.com', '11988887777'),
+('João Santos', 'joao.santos@email.com', '11999998888'),
+('Maria Oliveira', 'maria.oliveira@email.com', '11977776666');
+
+-- ===== Inserção de Empréstimos =====
+-- Exemplo: Livro 1 emprestado para Usuário 1
+INSERT INTO Emprestimo (livro_id, usuario_id, data_emprestimo)
+VALUES
+(1, 1, NOW());
+
+-- Atualiza o status do livro para indisponível
+UPDATE Livro SET disponivel = FALSE WHERE id = 1;
+
+-- Exemplo: Livro 2 disponível
+-- Nenhum empréstimo registrado, logo disponivel = TRUE
+SELECT * FROM biblioteca_db.emprestimo;
