@@ -1,0 +1,13 @@
+/home/ubuntu/upload/biblioteca-digital/biblioteca-digital/src/main/java/com/biblioteca/biblioteca_digital/model/Livro.java
+/home/ubuntu/upload/biblioteca-digital/biblioteca-digital/src/main/java/com/biblioteca/biblioteca_digital/model/Usuario.java
+/home/ubuntu/upload/biblioteca-digital/biblioteca-digital/src/main/java/com/biblioteca/biblioteca_digital/repository/LivroRepository.java
+/home/ubuntu/upload/biblioteca-digital/biblioteca-digital/src/main/java/com/biblioteca/biblioteca_digital/repository/UsuarioRepository.java
+/home/ubuntu/upload/biblioteca-digital/biblioteca-digital/src/main/java/com/biblioteca/biblioteca_digital/controller/LivroController.java
+/home/ubuntu/upload/biblioteca-digital/biblioteca-digital/src/main/java/com/biblioteca/biblioteca_digital/model/Emprestimo.java
+/home/ubuntu/upload/biblioteca-digital/biblioteca-digital/src/main/java/com/biblioteca/biblioteca_digital/controller/EmprestimoController.java
+/home/ubuntu/upload/biblioteca-digital/biblioteca-digital/src/main/java/com/biblioteca/biblioteca_digital/repository/EmprestimoRepository.java
+/home/ubuntu/upload/biblioteca-digital/biblioteca-digital/src/main/java/com/biblioteca/biblioteca_digital/BibliotecaDigitalApplication.java
+/home/ubuntu/upload/biblioteca-digital/biblioteca-digital/src/main/java/com/biblioteca/biblioteca_digital/services/LivroService.java
+/home/ubuntu/upload/biblioteca-digital/biblioteca-digital/src/main/java/com/biblioteca/biblioteca_digital/controller/UsuarioController.java
+/home/ubuntu/upload/biblioteca-digital/biblioteca-digital/src/main/java/com/biblioteca/biblioteca_digital/services/UsuarioService.java
+/home/ubuntu/upload/biblioteca-digital/biblioteca-digital/src/main/java/com/biblioteca/biblioteca_digital/services/EmprestimoService.java

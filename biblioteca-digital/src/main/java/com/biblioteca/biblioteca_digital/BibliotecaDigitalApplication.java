@@ -15,7 +15,7 @@ public class BibliotecaDigitalApplication {
 	}
 
 	@Bean
-	public CommandLineRunner demo(LivroRepository livroRepository) {
+	public CommandLineRunner demo() {
 		return args -> {
 			System.out.println("Sistema Online");
 		};

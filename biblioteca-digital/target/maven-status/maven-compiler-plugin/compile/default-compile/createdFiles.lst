@@ -1,0 +1,13 @@
+com\biblioteca\biblioteca_digital\BibliotecaDigitalApplication.class
+com\biblioteca\biblioteca_digital\controller\LivroController.class
+com\biblioteca\biblioteca_digital\controller\UsuarioController.class
+com\biblioteca\biblioteca_digital\service\LivroService.class
+com\biblioteca\biblioteca_digital\model\Emprestimo.class
+com\biblioteca\biblioteca_digital\model\Livro.class
+com\biblioteca\biblioteca_digital\model\Usuario.class
+com\biblioteca\biblioteca_digital\repository\UsuarioRepository.class
+com\biblioteca\biblioteca_digital\service\UsuarioService.class
+com\biblioteca\biblioteca_digital\controller\EmprestimoController.class
+com\biblioteca\biblioteca_digital\repository\LivroRepository.class
+com\biblioteca\biblioteca_digital\service\EmprestimoService.class
+com\biblioteca\biblioteca_digital\repository\EmprestimoRepository.class

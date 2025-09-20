@@ -9,6 +9,9 @@
         <module name="biblioteca-digital" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="biblioteca-digital (1) (br.com.biblioteca)" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">

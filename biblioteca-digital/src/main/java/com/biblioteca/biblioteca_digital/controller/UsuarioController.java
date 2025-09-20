@@ -2,11 +2,13 @@ package com.biblioteca.biblioteca_digital.controller;
 
 import com.biblioteca.biblioteca_digital.model.Usuario;
 import com.biblioteca.biblioteca_digital.service.UsuarioService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -20,7 +22,10 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public List<Usuario> listarTodos() {
+    public List<Usuario> buscarTodosOuPorEmail(@RequestParam(required = false) String email) {
+        if (email != null && !email.isEmpty()) {
+            return usuarioService.buscarPorEmail(email);
+        }
         return usuarioService.listarUsuarios();
     }
 
@@ -31,12 +36,13 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public Usuario adicionar(@RequestBody Usuario usuario) {
-        return usuarioService.salvarUsuario(usuario);
+    public ResponseEntity<Usuario> adicionar(@Valid @RequestBody Usuario usuario) {
+        Usuario salvo = usuarioService.salvarUsuario(usuario);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> atualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
+    public ResponseEntity<Usuario> atualizar(@PathVariable Long id, @Valid @RequestBody Usuario usuario) {
         usuario.setId(id);
         return ResponseEntity.ok(usuarioService.salvarUsuario(usuario));
     }
