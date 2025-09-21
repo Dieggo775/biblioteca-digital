@@ -162,19 +162,109 @@ async function devolverLivro(livroId) {
     }
 }
 
+// ===================== SALVAR NOVO LIVRO =====================
+const formLivro = document.getElementById("form-livro");
+formLivro.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const livroData = {
+        titulo: document.getElementById("livro-titulo").value.trim(),
+        autor: document.getElementById("livro-autor").value.trim(),
+        isbn: document.getElementById("livro-isbn").value.trim(),
+        anoPublicacao: parseInt(document.getElementById("livro-ano").value),
+        imagemUrl: document.getElementById("livro-imagem").value.trim(),
+        disponivel: true
+    };
+
+    try {
+        let response;
+        if (modoEdicao && livroEditandoId) {
+            response = await fetch(`${urlLivros}/${livroEditandoId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(livroData)
+            });
+        } else {
+            response = await fetch(urlLivros, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(livroData)
+            });
+        }
+
+        if (!response.ok) throw new Error(`Erro ao salvar livro: ${response.statusText}`);
+        fecharFormulario();
+        listarLivros();
+        mostrarMensagem("Livro salvo com sucesso!", "sucesso");
+
+    } catch (error) {
+        console.error("Erro:", error);
+        mostrarMensagem("Erro ao salvar livro.");
+    }
+});
+
+// ===================== FORMULÁRIO LATERAL =====================
+const formContainer = document.getElementById("form-livro-container");
+const btnNovoLivro = document.getElementById("btn-novo-livro");
+const btnCancelar = document.getElementById("btn-cancelar-livro");
+
+btnNovoLivro.onclick = () => abrirFormularioNovo();
+btnCancelar.onclick = () => fecharFormulario();
+
+function abrirFormularioNovo() {
+    modoEdicao = false;
+    livroEditandoId = null;
+    document.getElementById("form-livro-titulo").textContent = "Novo Livro";
+    formLivro.reset();
+    formContainer.classList.add("show");
+}
+
+function abrirFormularioEdicao(livro) {
+    modoEdicao = true;
+    livroEditandoId = livro.id;
+    document.getElementById("form-livro-titulo").textContent = "Editar Livro";
+    document.getElementById("livro-titulo").value = livro.titulo;
+    document.getElementById("livro-autor").value = livro.autor;
+    document.getElementById("livro-isbn").value = livro.isbn;
+    document.getElementById("livro-ano").value = livro.anoPublicacao;
+    document.getElementById("livro-imagem").value = livro.imagemUrl || "";
+    formContainer.classList.add("show");
+}
+
+function fecharFormulario() {
+    formContainer.classList.remove("show");
+}
+
+// ===================== DELETAR LIVRO =====================
+async function deletarLivro(livroId) {
+    if (!confirm("Tem certeza que deseja excluir este livro?")) return;
+
+    try {
+        const response = await fetch(`${urlLivros}/${livroId}`, {
+            method: "DELETE"
+        });
+
+        if (!response.ok) throw new Error(`Erro ao deletar livro: ${response.statusText}`);
+        listarLivros();
+        mostrarMensagem("Livro excluído com sucesso!", "sucesso");
+    } catch (error) {
+        console.error("Erro:", error);
+        mostrarMensagem("Erro ao excluir livro.");
+    }
+}
+
 // ===================== FILTRO POR TÍTULO =====================
 document.getElementById("busca").addEventListener("input", async function() {
     const termo = this.value.toLowerCase();
-
     try {
         const response = await fetch(urlLivros);
         if (!response.ok) throw new Error(`Erro ao buscar livros: ${response.statusText}`);
         const livros = await response.json();
 
         const filtrados = livros.filter(livro => livro.titulo.toLowerCase().includes(termo));
-
         const lista = document.getElementById("lista-livros");
         lista.innerHTML = "";
+
         filtrados.forEach(livro => {
             const card = document.createElement("div");
             card.className = "livro-card";
@@ -233,97 +323,6 @@ document.getElementById("busca").addEventListener("input", async function() {
         mostrarMensagem("Erro ao filtrar livros.");
     }
 });
-
-// ===================== FORMULÁRIO LATERAL =====================
-const formContainer = document.getElementById("form-livro-container");
-const formLivro = document.getElementById("form-livro");
-const btnNovoLivro = document.getElementById("btn-novo-livro");
-const btnCancelar = document.getElementById("btn-cancelar-livro");
-
-btnNovoLivro.onclick = () => abrirFormularioNovo();
-btnCancelar.onclick = () => fecharFormulario();
-
-function abrirFormularioNovo() {
-    modoEdicao = false;
-    livroEditandoId = null;
-    document.getElementById("form-livro-titulo").textContent = "Novo Livro";
-    formLivro.reset();
-    formContainer.classList.add("show");
-}
-
-function abrirFormularioEdicao(livro) {
-    modoEdicao = true;
-    livroEditandoId = livro.id;
-    document.getElementById("form-livro-titulo").textContent = "Editar Livro";
-    document.getElementById("livro-titulo").value = livro.titulo;
-    document.getElementById("livro-autor").value = livro.autor;
-    document.getElementById("livro-isbn").value = livro.isbn;
-    document.getElementById("livro-ano").value = livro.anoPublicacao;
-    document.getElementById("livro-imagem").value = livro.imagemUrl || "";
-    formContainer.classList.add("show");
-}
-
-function fecharFormulario() {
-    formContainer.classList.remove("show");
-}
-
-// ===================== SALVAR LIVRO =====================
-formLivro.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const livroData = {
-        titulo: document.getElementById("livro-titulo").value.trim(),
-        autor: document.getElementById("livro-autor").value.trim(),
-        isbn: document.getElementById("livro-isbn").value.trim(),
-        anoPublicacao: parseInt(document.getElementById("livro-ano").value),
-        imagemUrl: document.getElementById("livro-imagem").value.trim(),
-        disponivel: true
-    };
-
-    try {
-        let response;
-        if (modoEdicao && livroEditandoId) {
-            response = await fetch(`${urlLivros}/${livroEditandoId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(livroData)
-            });
-        } else {
-            response = await fetch(urlLivros, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(livroData)
-            });
-        }
-
-        if (!response.ok) throw new Error(`Erro ao salvar livro: ${response.statusText}`);
-        fecharFormulario();
-        listarLivros();
-        mostrarMensagem("Livro salvo com sucesso!", "sucesso");
-
-    } catch (error) {
-        console.error("Erro:", error);
-        mostrarMensagem("Erro ao salvar livro.");
-    }
-});
-
-// ===================== DELETAR LIVRO =====================
-async function deletarLivro(livroId) {
-    if (!confirm("Tem certeza que deseja excluir este livro?")) return;
-
-    try {
-        const response = await fetch(`${urlLivros}/${livroId}`, {
-            method: "DELETE"
-        });
-
-        if (!response.ok) throw new Error(`Erro ao deletar livro: ${response.statusText}`);
-        listarLivros();
-        mostrarMensagem("Livro excluído com sucesso!", "sucesso");
-    } catch (error) {
-        console.error("Erro:", error);
-        mostrarMensagem("Erro ao excluir livro.");
-    }
-}
 
 // ===================== INICIALIZAÇÃO =====================
 document.addEventListener("DOMContentLoaded", () => {

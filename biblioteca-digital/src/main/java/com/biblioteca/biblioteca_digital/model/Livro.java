@@ -17,6 +17,7 @@ public class Livro {
     private String isbn;
     private Integer anoPublicacao;
     private Boolean disponivel = true;
+    private Boolean emprestado = false;  // Inicialização padrão
     private String imagemUrl;
 
     public Livro() {}
@@ -39,6 +40,9 @@ public class Livro {
 
     public Boolean getDisponivel() { return disponivel; }
     public void setDisponivel(Boolean disponivel) { this.disponivel = disponivel; }
+
+    public Boolean getEmprestado() { return emprestado; }
+    public void setEmprestado(Boolean emprestado) { this.emprestado = emprestado; }
 
     public String getImagemUrl() { return imagemUrl; }
     public void setImagemUrl(String imagemUrl) { this.imagemUrl = imagemUrl; }
