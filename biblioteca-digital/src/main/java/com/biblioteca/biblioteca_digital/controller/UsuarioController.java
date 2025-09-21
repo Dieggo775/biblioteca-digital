@@ -1,18 +1,14 @@
 package com.biblioteca.biblioteca_digital.controller;
 
 import com.biblioteca.biblioteca_digital.model.Usuario;
-import com.biblioteca.biblioteca_digital.service.UsuarioService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.biblioteca.biblioteca_digital.services.UsuarioService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/usuarios")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -22,34 +18,31 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public List<Usuario> buscarTodosOuPorEmail(@RequestParam(required = false) String email) {
-        if (email != null && !email.isEmpty()) {
-            return usuarioService.buscarPorEmail(email);
-        }
+    public List<Usuario> listarUsuarios() {
         return usuarioService.listarUsuarios();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id) {
-        Optional<Usuario> usuario = usuarioService.buscarPorId(id);
-        return usuario.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public Usuario buscarPorId(@PathVariable Long id) {
+        return usuarioService.buscarPorId(id);
     }
 
     @PostMapping
-    public ResponseEntity<Usuario> adicionar(@Valid @RequestBody Usuario usuario) {
-        Usuario salvo = usuarioService.salvarUsuario(usuario);
-        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
+    public Usuario salvarUsuario(@RequestBody Usuario usuario) {
+        return usuarioService.salvarUsuario(usuario);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> atualizar(@PathVariable Long id, @Valid @RequestBody Usuario usuario) {
-        usuario.setId(id);
-        return ResponseEntity.ok(usuarioService.salvarUsuario(usuario));
+    public Usuario atualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuario) {
+        Usuario existente = usuarioService.buscarPorId(id);
+        existente.setNome(usuario.getNome());
+        existente.setEmail(usuario.getEmail());
+        existente.setTelefone(usuario.getTelefone());
+        return usuarioService.salvarUsuario(existente);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public void deletarUsuario(@PathVariable Long id) {
         usuarioService.deletarUsuario(id);
-        return ResponseEntity.noContent().build();
     }
 }

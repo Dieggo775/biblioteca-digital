@@ -1,18 +1,14 @@
 package com.biblioteca.biblioteca_digital.controller;
 
 import com.biblioteca.biblioteca_digital.model.Livro;
-import com.biblioteca.biblioteca_digital.service.LivroService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.biblioteca.biblioteca_digital.services.LivroService;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/livros")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class LivroController {
 
     private final LivroService livroService;
@@ -22,42 +18,34 @@ public class LivroController {
     }
 
     @GetMapping
-    public List<Livro> listarTodos() {
+    public List<Livro> listarLivros() {
         return livroService.listarLivros();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Livro> buscarPorId(@PathVariable Long id) {
-        Optional<Livro> livro = livroService.buscarPorId(id);
-        return livro.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public Livro buscarPorId(@PathVariable Long id) {
+        return livroService.buscarPorId(id);
     }
 
     @PostMapping
-    public ResponseEntity<Livro> adicionar(@Valid @RequestBody Livro livro) {
-        Livro salvo = livroService.salvarLivro(livro);
-        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
+    public Livro salvarLivro(@RequestBody Livro livro) {
+        return livroService.salvarLivro(livro);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Livro> atualizar(@PathVariable Long id, @Valid @RequestBody Livro livroAtualizado) {
-        livroAtualizado.setId(id);
-        return ResponseEntity.ok(livroService.salvarLivro(livroAtualizado));
+    public Livro atualizarLivro(@PathVariable Long id, @RequestBody Livro livro) {
+        Livro livroExistente = livroService.buscarPorId(id);
+        livroExistente.setTitulo(livro.getTitulo());
+        livroExistente.setAutor(livro.getAutor());
+        livroExistente.setIsbn(livro.getIsbn());
+        livroExistente.setAnoPublicacao(livro.getAnoPublicacao());
+        livroExistente.setImagemUrl(livro.getImagemUrl());
+        livroExistente.setDisponivel(livro.getDisponivel());
+        return livroService.salvarLivro(livroExistente);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remover(@PathVariable Long id) {
+    public void deletarLivro(@PathVariable Long id) {
         livroService.deletarLivro(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/titulo/{titulo}")
-    public List<Livro> buscarPorTitulo(@PathVariable String titulo) {
-        return livroService.buscarPorTitulo(titulo);
-    }
-
-    @GetMapping("/autor/{autor}")
-    public List<Livro> buscarPorAutor(@PathVariable String autor) {
-        return livroService.buscarPorAutor(autor);
     }
 }

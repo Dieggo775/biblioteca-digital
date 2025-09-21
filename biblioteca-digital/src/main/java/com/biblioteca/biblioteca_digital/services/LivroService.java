@@ -1,11 +1,10 @@
-package com.biblioteca.biblioteca_digital.service;
+package com.biblioteca.biblioteca_digital.services;
 
 import com.biblioteca.biblioteca_digital.model.Livro;
 import com.biblioteca.biblioteca_digital.repository.LivroRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class LivroService {
@@ -20,8 +19,8 @@ public class LivroService {
         return livroRepository.findAll();
     }
 
-    public Optional<Livro> buscarPorId(Long id) {
-        return livroRepository.findById(id);
+    public Livro buscarPorId(Long id) {
+        return livroRepository.findById(id).orElseThrow(() -> new RuntimeException("Livro não encontrado"));
     }
 
     public Livro salvarLivro(Livro livro) {
@@ -30,13 +29,5 @@ public class LivroService {
 
     public void deletarLivro(Long id) {
         livroRepository.deleteById(id);
-    }
-
-    public List<Livro> buscarPorTitulo(String titulo) {
-        return livroRepository.findByTituloContainingIgnoreCase(titulo);
-    }
-
-    public List<Livro> buscarPorAutor(String autor) {
-        return livroRepository.findByAutorContainingIgnoreCase(autor);
     }
 }

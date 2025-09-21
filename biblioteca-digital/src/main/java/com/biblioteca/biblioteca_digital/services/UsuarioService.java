@@ -1,10 +1,10 @@
-package com.biblioteca.biblioteca_digital.service;
+package com.biblioteca.biblioteca_digital.services;
 
 import com.biblioteca.biblioteca_digital.model.Usuario;
 import com.biblioteca.biblioteca_digital.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -15,13 +15,23 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public List<Usuario> listarUsuarios() { return usuarioRepository.findAll(); }
+    public List<Usuario> listarUsuarios() {
+        return usuarioRepository.findAll();
+    }
 
-    public Optional<Usuario> buscarPorId(Long id) { return usuarioRepository.findById(id); }
+    public Usuario buscarPorId(Long id) {
+        return usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    }
 
-    public Usuario salvarUsuario(Usuario usuario) { return usuarioRepository.save(usuario); }
+    public Usuario salvarUsuario(Usuario usuario) {
+        return usuarioRepository.save(usuario);
+    }
 
-    public void deletarUsuario(Long id) { usuarioRepository.deleteById(id); }
+    public void deletarUsuario(Long id) {
+        usuarioRepository.deleteById(id);
+    }
 
-    public List<Usuario> buscarPorEmail(String email) { return usuarioRepository.findByEmailIgnoreCase(email); }
+    public Usuario buscarPorEmail(String email) {
+        return usuarioRepository.findByEmail(email).stream().findFirst().orElse(null);
+    }
 }
