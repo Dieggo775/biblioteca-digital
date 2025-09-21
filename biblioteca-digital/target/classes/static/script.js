@@ -6,14 +6,7 @@ let usuarioLogado = null;
 let modoEdicao = false;
 let livroEditandoId = null;
 
-// Elementos do formulário de livros
-const formLivroContainer = document.getElementById("form-livro-container");
-const formLivro = document.getElementById("form-livro");
-const tituloFormLivro = document.getElementById("titulo-form-livro");
-const btnCancelarLivro = document.getElementById("btn-cancelar-livro");
-const btnNovoLivro = document.getElementById("btn-novo-livro");
-
-// Função para mostrar mensagens
+// ===================== MENSAGENS =====================
 function mostrarMensagem(mensagem, tipo = "erro") {
     const div = tipo === "erro" ? document.getElementById("mensagemErro") : document.getElementById("mensagemSucesso");
     div.textContent = mensagem;
@@ -23,6 +16,7 @@ function mostrarMensagem(mensagem, tipo = "erro") {
 // ===================== LOGIN / CADASTRO =====================
 document.getElementById("form-login").addEventListener("submit", async (event) => {
     event.preventDefault();
+
     const nome = document.getElementById("login-nome").value.trim();
     const email = document.getElementById("login-email").value.trim();
     const telefone = document.getElementById("login-telefone").value.trim();
@@ -35,6 +29,7 @@ document.getElementById("form-login").addEventListener("submit", async (event) =
     try {
         const response = await fetch(`${urlUsuarios}?email=${encodeURIComponent(email)}`);
         if (!response.ok) throw new Error(`Erro ao verificar usuário: ${response.statusText}`);
+
         const usuarios = await response.json();
 
         if (usuarios.length === 0) {
@@ -48,7 +43,7 @@ document.getElementById("form-login").addEventListener("submit", async (event) =
         listarLivros();
     } catch (error) {
         console.error("Erro:", error);
-        mostrarMensagem("Erro ao acessar usuário.");
+        mostrarMensagem("Erro ao acessar usuário. Veja o console para detalhes.");
     }
 });
 
@@ -59,12 +54,12 @@ async function listarLivros() {
     try {
         const response = await fetch(urlLivros);
         if (!response.ok) throw new Error(`Erro ao buscar livros: ${response.statusText}`);
-        const data = await response.json();
+        const livros = await response.json();
 
         const lista = document.getElementById("lista-livros");
         lista.innerHTML = "";
 
-        data.forEach(livro => {
+        livros.forEach(livro => {
             const card = document.createElement("div");
             card.className = "livro-card";
 
@@ -80,26 +75,37 @@ async function listarLivros() {
                 <p><strong>Autor:</strong> ${livro.autor}</p>
                 <p><strong>Ano:</strong> ${livro.anoPublicacao}</p>
                 <p><strong>ISBN:</strong> ${livro.isbn}</p>
+                <p><strong>Disponibilidade:</strong>
+                    <span class="${livro.disponivel ? 'disponivel' : 'indisponivel'}">
+                        ${livro.disponivel ? 'Disponível' : 'Indisponível'}
+                    </span>
+                </p>
             `;
             card.appendChild(info);
 
             // Botões
             const btnEmprestar = document.createElement("button");
+            btnEmprestar.className = "emprestar";
             btnEmprestar.textContent = "Emprestar";
+            btnEmprestar.disabled = !livro.disponivel;
             btnEmprestar.onclick = () => emprestarLivro(livro.id);
             card.appendChild(btnEmprestar);
 
             const btnDevolver = document.createElement("button");
+            btnDevolver.className = "devolver";
             btnDevolver.textContent = "Devolver";
+            btnDevolver.disabled = livro.disponivel;
             btnDevolver.onclick = () => devolverLivro(livro.id);
             card.appendChild(btnDevolver);
 
             const btnEditar = document.createElement("button");
+            btnEditar.className = "editar";
             btnEditar.textContent = "Editar";
-            btnEditar.onclick = () => prepararEdicao(livro);
+            btnEditar.onclick = () => abrirFormularioEdicao(livro);
             card.appendChild(btnEditar);
 
             const btnExcluir = document.createElement("button");
+            btnExcluir.className = "excluir";
             btnExcluir.textContent = "Excluir";
             btnExcluir.onclick = () => deletarLivro(livro.id);
             card.appendChild(btnExcluir);
@@ -115,14 +121,18 @@ async function listarLivros() {
 
 // ===================== EMPRESTAR / DEVOLVER =====================
 async function emprestarLivro(livroId) {
-    if (!usuarioLogado) { mostrarMensagem("Você precisa estar logado para emprestar."); return; }
+    if (!usuarioLogado) {
+        mostrarMensagem("Você precisa estar logado para emprestar.");
+        return;
+    }
+
     try {
-        const response = await fetch(urlEmprestimos, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ usuarioId: usuarioLogado.id, livroId })
+        const response = await fetch(`${urlEmprestimos}/emprestar?livroId=${livroId}&usuarioId=${usuarioLogado.id}`, {
+            method: "POST"
         });
+
         if (!response.ok) throw new Error(`Erro ao emprestar livro: ${response.statusText}`);
+
         mostrarMensagem("Livro emprestado com sucesso!", "sucesso");
         listarLivros();
     } catch (error) {
@@ -132,14 +142,18 @@ async function emprestarLivro(livroId) {
 }
 
 async function devolverLivro(livroId) {
-    if (!usuarioLogado) { mostrarMensagem("Você precisa estar logado para devolver."); return; }
+    if (!usuarioLogado) {
+        mostrarMensagem("Você precisa estar logado para devolver.");
+        return;
+    }
+
     try {
-        const response = await fetch(`${urlEmprestimos}/devolver`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ usuarioId: usuarioLogado.id, livroId })
+        const response = await fetch(`${urlEmprestimos}/devolver?livroId=${livroId}`, {
+            method: "POST"
         });
+
         if (!response.ok) throw new Error(`Erro ao devolver livro: ${response.statusText}`);
+
         mostrarMensagem("Livro devolvido com sucesso!", "sucesso");
         listarLivros();
     } catch (error) {
@@ -148,95 +162,6 @@ async function devolverLivro(livroId) {
     }
 }
 
-// ===================== EDIÇÃO / ADIÇÃO LIVRO =====================
-function prepararEdicao(livro) {
-    modoEdicao = true;
-    livroEditandoId = livro.id;
-
-    tituloFormLivro.textContent = "Editar Livro";
-    formLivroContainer.style.display = "block";
-
-    document.getElementById("livro-titulo").value = livro.titulo;
-    document.getElementById("livro-autor").value = livro.autor;
-    document.getElementById("livro-ano").value = livro.anoPublicacao;
-    document.getElementById("livro-isbn").value = livro.isbn;
-    document.getElementById("livro-imagem").value = livro.imagemUrl || "";
-}
-
-function prepararNovoLivro() {
-    modoEdicao = false;
-    livroEditandoId = null;
-
-    tituloFormLivro.textContent = "Adicionar Livro";
-    formLivroContainer.style.display = "block";
-
-    formLivro.reset();
-}
-
-// ===================== SALVAR / ATUALIZAR LIVRO =====================
-formLivro.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const dados = {
-        titulo: document.getElementById("livro-titulo").value,
-        autor: document.getElementById("livro-autor").value,
-        anoPublicacao: parseInt(document.getElementById("livro-ano").value),
-        isbn: document.getElementById("livro-isbn").value,
-        imagemUrl: document.getElementById("livro-imagem").value
-    };
-
-    try {
-        let response;
-        if (modoEdicao) {
-            response = await fetch(`${urlLivros}/${livroEditandoId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dados)
-            });
-        } else {
-            response = await fetch(urlLivros, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dados)
-            });
-        }
-
-        if (!response.ok) throw new Error("Erro ao salvar livro");
-
-        mostrarMensagem(`Livro ${modoEdicao ? "atualizado" : "adicionado"} com sucesso!`, "sucesso");
-        formLivroContainer.style.display = "none";
-        listarLivros();
-    } catch (error) {
-        console.error("Erro:", error);
-        mostrarMensagem("Erro ao salvar livro.");
-    }
-});
-
-// ===================== EXCLUIR LIVRO =====================
-async function deletarLivro(livroId) {
-    if (!confirm("Deseja realmente excluir este livro?")) return;
-
-    try {
-        const response = await fetch(`${urlLivros}/${livroId}`, { method: "DELETE" });
-        if (!response.ok) throw new Error("Erro ao deletar livro");
-        mostrarMensagem("Livro excluído com sucesso!", "sucesso");
-        listarLivros();
-    } catch (error) {
-        console.error("Erro:", error);
-        mostrarMensagem("Erro ao excluir livro.");
-    }
-}
-
-// ===================== CANCELAR EDIÇÃO =====================
-btnCancelarLivro.addEventListener("click", () => {
-    formLivroContainer.style.display = "none";
-    modoEdicao = false;
-    livroEditandoId = null;
-});
-
-// ===================== NOVO LIVRO =====================
-btnNovoLivro.addEventListener("click", prepararNovoLivro);
-
 // ===================== FILTRO POR TÍTULO =====================
 document.getElementById("busca").addEventListener("input", async function() {
     const termo = this.value.toLowerCase();
@@ -244,9 +169,9 @@ document.getElementById("busca").addEventListener("input", async function() {
     try {
         const response = await fetch(urlLivros);
         if (!response.ok) throw new Error(`Erro ao buscar livros: ${response.statusText}`);
-        const data = await response.json();
+        const livros = await response.json();
 
-        const filtrados = data.filter(livro => livro.titulo.toLowerCase().includes(termo));
+        const filtrados = livros.filter(livro => livro.titulo.toLowerCase().includes(termo));
 
         const lista = document.getElementById("lista-livros");
         lista.innerHTML = "";
@@ -266,26 +191,36 @@ document.getElementById("busca").addEventListener("input", async function() {
                 <p><strong>Autor:</strong> ${livro.autor}</p>
                 <p><strong>Ano:</strong> ${livro.anoPublicacao}</p>
                 <p><strong>ISBN:</strong> ${livro.isbn}</p>
+                <p><strong>Disponibilidade:</strong>
+                    <span class="${livro.disponivel ? 'disponivel' : 'indisponivel'}">
+                        ${livro.disponivel ? 'Disponível' : 'Indisponível'}
+                    </span>
+                </p>
             `;
             card.appendChild(info);
 
-            // Botões
             const btnEmprestar = document.createElement("button");
+            btnEmprestar.className = "emprestar";
             btnEmprestar.textContent = "Emprestar";
+            btnEmprestar.disabled = !livro.disponivel;
             btnEmprestar.onclick = () => emprestarLivro(livro.id);
             card.appendChild(btnEmprestar);
 
             const btnDevolver = document.createElement("button");
+            btnDevolver.className = "devolver";
             btnDevolver.textContent = "Devolver";
+            btnDevolver.disabled = livro.disponivel;
             btnDevolver.onclick = () => devolverLivro(livro.id);
             card.appendChild(btnDevolver);
 
             const btnEditar = document.createElement("button");
+            btnEditar.className = "editar";
             btnEditar.textContent = "Editar";
-            btnEditar.onclick = () => prepararEdicao(livro);
+            btnEditar.onclick = () => abrirFormularioEdicao(livro);
             card.appendChild(btnEditar);
 
             const btnExcluir = document.createElement("button");
+            btnExcluir.className = "excluir";
             btnExcluir.textContent = "Excluir";
             btnExcluir.onclick = () => deletarLivro(livro.id);
             card.appendChild(btnExcluir);
@@ -298,6 +233,97 @@ document.getElementById("busca").addEventListener("input", async function() {
         mostrarMensagem("Erro ao filtrar livros.");
     }
 });
+
+// ===================== FORMULÁRIO LATERAL =====================
+const formContainer = document.getElementById("form-livro-container");
+const formLivro = document.getElementById("form-livro");
+const btnNovoLivro = document.getElementById("btn-novo-livro");
+const btnCancelar = document.getElementById("btn-cancelar-livro");
+
+btnNovoLivro.onclick = () => abrirFormularioNovo();
+btnCancelar.onclick = () => fecharFormulario();
+
+function abrirFormularioNovo() {
+    modoEdicao = false;
+    livroEditandoId = null;
+    document.getElementById("form-livro-titulo").textContent = "Novo Livro";
+    formLivro.reset();
+    formContainer.classList.add("show");
+}
+
+function abrirFormularioEdicao(livro) {
+    modoEdicao = true;
+    livroEditandoId = livro.id;
+    document.getElementById("form-livro-titulo").textContent = "Editar Livro";
+    document.getElementById("livro-titulo").value = livro.titulo;
+    document.getElementById("livro-autor").value = livro.autor;
+    document.getElementById("livro-isbn").value = livro.isbn;
+    document.getElementById("livro-ano").value = livro.anoPublicacao;
+    document.getElementById("livro-imagem").value = livro.imagemUrl || "";
+    formContainer.classList.add("show");
+}
+
+function fecharFormulario() {
+    formContainer.classList.remove("show");
+}
+
+// ===================== SALVAR LIVRO =====================
+formLivro.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const livroData = {
+        titulo: document.getElementById("livro-titulo").value.trim(),
+        autor: document.getElementById("livro-autor").value.trim(),
+        isbn: document.getElementById("livro-isbn").value.trim(),
+        anoPublicacao: parseInt(document.getElementById("livro-ano").value),
+        imagemUrl: document.getElementById("livro-imagem").value.trim(),
+        disponivel: true
+    };
+
+    try {
+        let response;
+        if (modoEdicao && livroEditandoId) {
+            response = await fetch(`${urlLivros}/${livroEditandoId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(livroData)
+            });
+        } else {
+            response = await fetch(urlLivros, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(livroData)
+            });
+        }
+
+        if (!response.ok) throw new Error(`Erro ao salvar livro: ${response.statusText}`);
+        fecharFormulario();
+        listarLivros();
+        mostrarMensagem("Livro salvo com sucesso!", "sucesso");
+
+    } catch (error) {
+        console.error("Erro:", error);
+        mostrarMensagem("Erro ao salvar livro.");
+    }
+});
+
+// ===================== DELETAR LIVRO =====================
+async function deletarLivro(livroId) {
+    if (!confirm("Tem certeza que deseja excluir este livro?")) return;
+
+    try {
+        const response = await fetch(`${urlLivros}/${livroId}`, {
+            method: "DELETE"
+        });
+
+        if (!response.ok) throw new Error(`Erro ao deletar livro: ${response.statusText}`);
+        listarLivros();
+        mostrarMensagem("Livro excluído com sucesso!", "sucesso");
+    } catch (error) {
+        console.error("Erro:", error);
+        mostrarMensagem("Erro ao excluir livro.");
+    }
+}
 
 // ===================== INICIALIZAÇÃO =====================
 document.addEventListener("DOMContentLoaded", () => {

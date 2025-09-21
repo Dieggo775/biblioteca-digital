@@ -6,6 +6,7 @@ import com.biblioteca.biblioteca_digital.model.Usuario;
 import com.biblioteca.biblioteca_digital.repository.EmprestimoRepository;
 import com.biblioteca.biblioteca_digital.repository.LivroRepository;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 
 @Service
@@ -19,10 +20,11 @@ public class EmprestimoService {
         this.livroRepository = livroRepository;
     }
 
-    public void emprestarLivro(Livro livro, Usuario usuario) {
+    public Emprestimo emprestarLivro(Livro livro, Usuario usuario) {
         if (!livro.isDisponivel()) {
-            throw new RuntimeException("Livro indisponível para empréstimo.");
+            throw new RuntimeException("Livro não está disponível para empréstimo.");
         }
+
         livro.setDisponivel(false);
         livroRepository.save(livro);
 
@@ -30,15 +32,32 @@ public class EmprestimoService {
         emprestimo.setLivro(livro);
         emprestimo.setUsuario(usuario);
         emprestimo.setDataEmprestimo(LocalDateTime.now());
-
-        emprestimoRepository.save(emprestimo);
+        return emprestimoRepository.save(emprestimo);
     }
 
-    public void devolverLivro(Livro livro) {
+    public Emprestimo devolverLivro(Livro livro) {
+        // Se o livro já estiver disponível, apenas retorna null (ou pode retornar o último empréstimo)
         if (livro.isDisponivel()) {
-            throw new RuntimeException("Livro já está disponível.");
+            // Opcional: pode buscar o último empréstimo do livro
+            return emprestimoRepository.findAll().stream()
+                    .filter(e -> e.getLivro().getId().equals(livro.getId()))
+                    .reduce((first, second) -> second) // pega o último
+                    .orElse(null);
         }
+
         livro.setDisponivel(true);
         livroRepository.save(livro);
+
+        Emprestimo emprestimo = emprestimoRepository.findAll().stream()
+                .filter(e -> e.getLivro().getId().equals(livro.getId()) && e.getDataDevolucao() == null)
+                .findFirst()
+                .orElse(null); // Retorna null se não achar
+
+        if (emprestimo != null) {
+            emprestimo.setDataDevolucao(LocalDateTime.now());
+            emprestimo = emprestimoRepository.save(emprestimo);
+        }
+
+        return emprestimo;
     }
 }

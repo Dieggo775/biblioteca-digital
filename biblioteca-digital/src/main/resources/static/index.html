@@ -23,25 +23,28 @@
 
 <!-- ===================== ÁREA DE LIVROS (apenas para membros logados) ===================== -->
 <div id="area-livros">
+    <button id="btn-novo-livro">➕ Novo Livro</button>
+
     <h2>Buscar livro</h2>
     <input type="text" id="busca" placeholder="Buscar por título">
-    <button id="btn-novo-livro">➕ Novo Livro</button>
 
     <h2>Lista de Livros</h2>
     <div id="lista-livros"></div>
 </div>
 
-<!-- ===================== FORMULÁRIO DE ADIÇÃO / EDIÇÃO ===================== -->
-<div id="form-livro-container" style="display:none; margin-top:20px;">
-    <h2 id="titulo-form-livro">Adicionar Livro</h2>
+<!-- ===================== FORMULÁRIO LATERAL ===================== -->
+<div id="form-livro-container">
+    <h2 id="form-livro-titulo">Novo Livro</h2>
     <form id="form-livro">
-        <input type="text" id="livro-titulo" placeholder="Título" required><br>
-        <input type="text" id="livro-autor" placeholder="Autor" required><br>
-        <input type="number" id="livro-ano" placeholder="Ano de publicação" required><br>
-        <input type="text" id="livro-isbn" placeholder="ISBN" required><br>
-        <input type="text" id="livro-imagem" placeholder="URL da imagem"><br>
-        <button type="submit" id="btn-salvar-livro">Salvar</button>
-        <button type="button" id="btn-cancelar-livro">Cancelar</button>
+        <input type="text" id="livro-titulo" placeholder="Título" required>
+        <input type="text" id="livro-autor" placeholder="Autor" required>
+        <input type="text" id="livro-isbn" placeholder="ISBN" required>
+        <input type="number" id="livro-ano" placeholder="Ano de Publicação" required>
+        <input type="text" id="livro-imagem" placeholder="URL da Imagem">
+        <div>
+            <button type="submit" id="btn-salvar-livro">Salvar</button>
+            <button type="button" id="btn-cancelar-livro">Cancelar</button>
+        </div>
     </form>
 </div>
 

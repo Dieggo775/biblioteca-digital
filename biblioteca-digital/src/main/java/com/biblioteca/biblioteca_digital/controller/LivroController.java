@@ -34,43 +34,28 @@ public class LivroController {
     }
 
     @PostMapping
-    public ResponseEntity<?> adicionar(@Valid @RequestBody Livro livro) {
-        try {
-            Livro salvo = livroService.salvarLivro(livro);
-            return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<Livro> adicionar(@Valid @RequestBody Livro livro) {
+        Livro salvo = livroService.salvarLivro(livro);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody Livro livroAtualizado) {
-        try {
-            livroAtualizado.setId(id);
-            Livro atualizado = livroService.salvarLivro(livroAtualizado);
-            return ResponseEntity.ok(atualizado);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<Livro> atualizar(@PathVariable Long id, @Valid @RequestBody Livro livroAtualizado) {
+        livroAtualizado.setId(id);
+        return ResponseEntity.ok(livroService.salvarLivro(livroAtualizado));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> remover(@PathVariable Long id) {
-        if (livroService.buscarPorId(id).isPresent()) {
-            livroService.deletarLivro(id);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        livroService.deletarLivro(id);
+        return ResponseEntity.noContent().build();
     }
 
-    // Busca por título
     @GetMapping("/titulo/{titulo}")
     public List<Livro> buscarPorTitulo(@PathVariable String titulo) {
         return livroService.buscarPorTitulo(titulo);
     }
 
-    // Busca por autor
     @GetMapping("/autor/{autor}")
     public List<Livro> buscarPorAutor(@PathVariable String autor) {
         return livroService.buscarPorAutor(autor);

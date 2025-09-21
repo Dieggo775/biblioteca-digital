@@ -49,12 +49,27 @@ h1, h2 {
   font-weight: bold;
 }
 
-/* ===================== LISTA DE LIVROS ===================== */
+/* ===================== ÁREA DE LIVROS ===================== */
 #area-livros {
   margin-top: 20px;
 }
 
-/* Lista de livros em grade responsiva */
+#btn-novo-livro {
+  padding: 10px 15px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 15px;
+  transition: background 0.2s ease;
+}
+
+#btn-novo-livro:hover {
+  background-color: #1e7e34;
+}
+
 #lista-livros {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -62,7 +77,6 @@ h1, h2 {
   margin-top: 20px;
 }
 
-/* Card individual */
 .livro-card {
   border: none;
   border-radius: 12px;
@@ -78,7 +92,6 @@ h1, h2 {
   box-shadow: 0 6px 18px rgba(0,0,0,0.2);
 }
 
-/* Imagem do livro */
 .livro-card img {
   width: 100%;
   height: 280px;
@@ -87,7 +100,6 @@ h1, h2 {
   margin-bottom: 8px;
 }
 
-/* Título e informações */
 .livro-info h3 {
   margin: 8px 0;
   font-size: 1.2em;
@@ -97,13 +109,11 @@ h1, h2 {
 .livro-info p {
   margin: 4px 0;
   font-size: 0.95em;
-  color: #eb0c0c;
 }
 
-/* Botões dentro dos cards */
 .livro-card button {
-  margin: 6px;
-  padding: 8px 14px;
+  margin: 6px 4px;
+  padding: 8px 12px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -111,25 +121,30 @@ h1, h2 {
   transition: background 0.2s ease;
 }
 
-.livro-card button:first-of-type {
-  background-color: #353333;
-  color: white;
+/* Botões específicos */
+.livro-card button.editar { background-color: #ffc107; color:white; }
+.livro-card button.editar:hover { background-color: #e0a800; }
+
+.livro-card button.excluir { background-color: #dc3545; color:white; }
+.livro-card button.excluir:hover { background-color: #c82333; }
+
+.livro-card button.emprestar { background-color: #007bff; color:white; }
+.livro-card button.emprestar:hover { background-color: #0056b3; }
+
+.livro-card button.devolver { background-color: #28a745; color:white; }
+.livro-card button.devolver:hover { background-color: #1e7e34; }
+
+/* Disponibilidade */
+.livro-info span.disponivel {
+  font-weight: bold;
+  color: green;
 }
 
-.livro-card button:first-of-type:hover {
-  background-color: #0c0c0c;
+.livro-info span.indisponivel {
+  font-weight: bold;
+  color: red;
 }
 
-.livro-card button:last-of-type {
-  background-color: #b14c4c;
-  color: white;
-}
-
-.livro-card button:last-of-type:hover {
-  background-color: #a71d2a;
-}
-
-/* ===================== INPUT DE BUSCA ===================== */
 #busca {
   padding: 10px;
   width: 300px;
@@ -138,3 +153,46 @@ h1, h2 {
   font-size: 0.95em;
   margin-bottom: 20px;
 }
+
+/* ===================== FORMULÁRIO LATERAL ===================== */
+#form-livro-container {
+  position: fixed;
+  top: 0;
+  right: -450px;
+  width: 400px;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: -4px 0 12px rgba(0,0,0,0.2);
+  padding: 20px;
+  overflow-y: auto;
+  transition: right 0.3s ease;
+  z-index: 1000;
+}
+
+#form-livro-container.show { right: 0; }
+
+#form-livro-container h2 { margin-top: 0; }
+
+#form-livro-container input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95em;
+}
+
+#form-livro-container button {
+  padding: 10px 15px;
+  margin-right: 5px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#btn-salvar-livro { background-color: #007bff; color:white; }
+#btn-salvar-livro:hover { background-color: #0056b3; }
+
+#btn-cancelar-livro { background-color: #6c757d; color:white; }
+#btn-cancelar-livro:hover { background-color: #5a6268; }
